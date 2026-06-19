@@ -1,44 +1,34 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BANCO MINERVA</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:        #000814;
-  --bg2:       #001b3d;
-  --bg3:       #003566;
-  --azul:      #00B4D8;
-  --gelo:      #90E0EF;
-  --verde:     #22c55e;
-  --verde2:    #16a34a;
-  --vermelho:  #ef4444;
-  --roxo:      #7b2ff7;
-  --roxo2:     #a855f7;
-  --cinza:     #94a3b8;
-  --painel:    rgba(255,255,255,0.04);
-  --borda:     rgba(144,224,239,0.13);
-  --r:         16px;
+:root{
+  --bg:#000814;--bg2:#001b3d;--bg3:#003566;
+  --azul:#00B4D8;--gelo:#90E0EF;
+  --verde:#22c55e;--verde2:#16a34a;
+  --vermelho:#ef4444;--roxo:#7b2ff7;--roxo2:#a855f7;
+  --cinza:#94a3b8;--painel:rgba(255,255,255,0.04);
+  --borda:rgba(144,224,239,0.13);--r:16px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 100%);color:#fff;min-height:100vh;overflow-x:hidden}
 input,button{font-family:inherit}
 .hidden{display:none!important}
 
-/* ===== NOTIFICAÇÃO ===== */
-.notif{position:fixed;top:24px;right:24px;padding:16px 24px;border-radius:14px;font-weight:600;font-size:.95rem;z-index:9999;
-  transform:translateX(420px);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:340px;
-  box-shadow:0 10px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:12px}
+/* NOTIF */
+.notif{position:fixed;top:24px;right:24px;padding:16px 24px;border-radius:14px;font-weight:600;font-size:.95rem;z-index:9999;transform:translateX(420px);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:12px}
 .notif.ok{background:linear-gradient(135deg,#15803d,var(--verde))}
 .notif.erro{background:linear-gradient(135deg,#991b1b,var(--vermelho))}
 .notif.info{background:linear-gradient(135deg,#1d4ed8,var(--azul))}
 .notif.show{transform:translateX(0)}
 
-/* ===== MODAL ===== */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center}
-.modal{background:linear-gradient(135deg,#00122e,var(--bg2));border:1px solid var(--borda);border-radius:22px;padding:40px;width:90%;max-width:420px}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:linear-gradient(135deg,#00122e,var(--bg2));border:1px solid var(--borda);border-radius:22px;padding:40px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
 .modal h3{color:var(--gelo);font-size:1.3rem;margin-bottom:24px;text-align:center}
 .modal input{width:100%;padding:14px 18px;background:rgba(255,255,255,.08);border:1.5px solid transparent;border-radius:12px;color:#fff;font-size:1rem;margin-bottom:14px;transition:.25s}
 .modal input:focus{outline:none;border-color:var(--azul);background:rgba(255,255,255,.12)}
@@ -49,12 +39,29 @@ input,button{font-family:inherit}
 .btn-cancelar{background:rgba(255,255,255,.08);color:var(--cinza)}
 .modal-btns button:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
 
-/* ===== TELA INICIAL ===== */
+/* COMPROVANTE */
+.comprovante{background:#fff;color:#111;border-radius:18px;padding:36px 32px;max-width:400px;margin:0 auto;font-family:'Segoe UI',sans-serif;position:relative;overflow:hidden}
+.comprovante::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--azul),var(--verde))}
+.comp-logo{text-align:center;margin-bottom:4px}
+.comp-logo span{font-family:'Impact',sans-serif;font-size:1.6rem;color:#003566;letter-spacing:2px}
+.comp-logo p{font-size:.72rem;color:#64748b;letter-spacing:2px;text-transform:uppercase}
+.comp-status{text-align:center;margin:20px 0}
+.comp-check{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 10px}
+.comp-status h4{color:#15803d;font-size:1.1rem;font-weight:700}
+.comp-valor-big{text-align:center;font-size:2.4rem;font-weight:700;color:#111;margin:18px 0 6px}
+.comp-tipo{text-align:center;font-size:.82rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:22px}
+.comp-linha{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:.88rem}
+.comp-linha:last-of-type{border-bottom:none}
+.comp-linha .cl{color:#64748b}
+.comp-linha .cv{color:#111;font-weight:600;text-align:right;max-width:55%}
+.comp-codigo{background:#f8fafc;border-radius:10px;padding:14px;text-align:center;margin-top:18px;font-family:'Consolas',monospace;font-size:.75rem;color:#475569;word-break:break-all;border:1px dashed #cbd5e1}
+.comp-codigo small{display:block;font-size:.68rem;color:#94a3b8;margin-bottom:4px;font-family:'Segoe UI',sans-serif}
+.btn-imprimir{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(45deg,#003566,#0077B6);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:18px;transition:.25s}
+.btn-imprimir:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,119,182,.4)}
+
+/* TELA INICIAL */
 #telaInicial{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px}
-.logo-hero{font-family:'Impact',sans-serif;font-size:clamp(3.5rem,9vw,6.5rem);
-  background:linear-gradient(45deg,var(--gelo),var(--azul));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  animation:glow 2.5s ease-in-out infinite alternate;margin-bottom:8px}
+.logo-hero{font-family:'Impact',sans-serif;font-size:clamp(3.5rem,9vw,6.5rem);background:linear-gradient(45deg,var(--gelo),var(--azul));-webkit-background-clip:text;background-clip:text;color:transparent;animation:glow 2.5s ease-in-out infinite alternate;margin-bottom:8px}
 @keyframes glow{from{filter:drop-shadow(0 0 4px var(--gelo))}to{filter:drop-shadow(0 0 12px var(--azul))}}
 .hero-sub{color:var(--gelo);opacity:.8;font-size:1rem;letter-spacing:3px;margin-bottom:40px;text-transform:uppercase}
 .hero-btns{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-bottom:60px}
@@ -69,7 +76,7 @@ input,button{font-family:inherit}
 .feat-card h4{color:var(--gelo);margin-bottom:6px;font-size:1rem}
 .feat-card p{color:var(--cinza);font-size:.85rem}
 
-/* ===== FORMS (login/cadastro) ===== */
+/* FORMS */
 .tela-form{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
 .form-card{background:rgba(0,18,46,.92);border:1px solid var(--borda);border-radius:22px;padding:50px 44px;width:100%;max-width:430px;backdrop-filter:blur(10px);box-shadow:0 25px 70px rgba(0,0,0,.6)}
 .form-logo{text-align:center;margin-bottom:28px}
@@ -88,12 +95,9 @@ input,button{font-family:inherit}
 .form-link{text-align:center;margin-top:18px;font-size:.9rem;color:var(--cinza)}
 .form-link a{color:var(--azul);cursor:pointer;font-weight:600}
 
-/* ===== DASHBOARD ===== */
+/* DASHBOARD */
 #dashboard{display:flex;min-height:100vh}
-
-/* sidebar */
-.sidebar{width:260px;flex-shrink:0;background:linear-gradient(180deg,#00040a 0%,var(--bg2) 100%);
-  border-right:1px solid var(--borda);display:flex;flex-direction:column;padding:0}
+.sidebar{width:260px;flex-shrink:0;background:linear-gradient(180deg,#00040a 0%,var(--bg2) 100%);border-right:1px solid var(--borda);display:flex;flex-direction:column;padding:0}
 .sb-logo{padding:28px 24px 20px;border-bottom:1px solid var(--borda)}
 .sb-logo .nome{font-family:'Impact',sans-serif;font-size:1.8rem;color:var(--gelo);letter-spacing:2px}
 .sb-logo .sub{font-size:.7rem;color:var(--cinza);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
@@ -118,7 +122,7 @@ input,button{font-family:inherit}
 .btn-sair{width:100%;padding:12px;border:none;border-radius:12px;background:rgba(239,68,68,.12);color:#fca5a5;font-weight:600;cursor:pointer;font-size:.9rem;transition:.22s}
 .btn-sair:hover{background:var(--vermelho);color:#fff}
 
-/* main */
+/* MAIN */
 .main{flex:1;overflow-y:auto;padding:36px 40px}
 .pg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
 .pg-titulo{font-size:1.6rem;font-weight:700;color:#fff}
@@ -126,13 +130,12 @@ input,button{font-family:inherit}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.8rem;font-weight:600}
 .badge-verde{background:rgba(34,197,94,.15);color:var(--verde);border:1px solid rgba(34,197,94,.25)}
 
-/* card saldo */
-.card-saldo{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);
-  border:1px solid rgba(0,180,216,.3);border-radius:22px;padding:36px 40px;
-  margin-bottom:24px;position:relative;overflow:hidden}
-.card-saldo::after{content:'';position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;
-  background:radial-gradient(circle,rgba(0,180,216,.15),transparent 70%);pointer-events:none}
+/* CARD SALDO */
+.card-saldo{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);border:1px solid rgba(0,180,216,.3);border-radius:22px;padding:36px 40px;margin-bottom:24px;position:relative;overflow:hidden}
+.card-saldo::after{content:'';position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,.15),transparent 70%);pointer-events:none}
 .saldo-label{font-size:.8rem;color:var(--gelo);letter-spacing:1.5px;text-transform:uppercase;opacity:.85;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.btn-olho{background:none;border:none;color:var(--gelo);cursor:pointer;font-size:1rem;opacity:.7;transition:.2s}
+.btn-olho:hover{opacity:1}
 .saldo-valor{font-size:2.8rem;font-weight:700;letter-spacing:1px;margin-bottom:4px}
 .saldo-conta{font-size:.82rem;color:var(--cinza);margin-bottom:28px}
 .acoes{display:flex;gap:12px;flex-wrap:wrap}
@@ -140,14 +143,15 @@ input,button{font-family:inherit}
 .acao .ai{font-size:1.5rem}
 .acao:hover{background:rgba(0,180,216,.18);border-color:var(--azul);transform:translateY(-4px)}
 
-/* seções */
+/* PAINEL */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
 .painel{background:var(--painel);border:1px solid var(--borda);border-radius:var(--r);padding:26px}
 .painel-h{font-size:.78rem;color:var(--cinza);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;font-weight:700;display:flex;align-items:center;gap:8px}
 
-/* extrato */
-.ext-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+/* EXTRATO */
+.ext-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:.15s;border-radius:8px;padding-left:6px;padding-right:6px}
+.ext-item:hover{background:rgba(255,255,255,.04)}
 .ext-item:last-child{border-bottom:none}
 .ext-ic{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
 .ic-e{background:rgba(34,197,94,.15)}
@@ -159,21 +163,21 @@ input,button{font-family:inherit}
 .ext-val{font-weight:700;font-size:.95rem;white-space:nowrap}
 .val-pos{color:var(--verde)}
 .val-neg{color:var(--vermelho)}
+.ext-ver{font-size:.72rem;color:var(--azul);opacity:.7;margin-left:4px;white-space:nowrap}
 
-/* stat boxes */
+/* STAT */
 .stat-box{background:var(--painel);border:1px solid var(--borda);border-radius:14px;padding:22px}
 .stat-box .sl{font-size:.75rem;color:var(--cinza);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .stat-box .sv{font-size:1.6rem;font-weight:700;color:var(--gelo)}
 
-/* ===== PIX ===== */
+/* PIX */
 .pix-wrap{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 .pix-chave-box{background:rgba(0,180,216,.08);border:1px dashed rgba(0,180,216,.4);border-radius:14px;padding:20px;text-align:center;margin-bottom:20px}
 .pix-chave-box .lbl{font-size:.75rem;color:var(--cinza);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
-.pix-chave-box .chave{font-family:'Consolas',monospace;font-size:1.3rem;color:var(--azul);font-weight:700;word-break:break-all}
+.pix-chave-box .chave{font-family:'Consolas',monospace;font-size:1.3rem;color:var(--azul);font-weight:700}
 .pix-saldo-box{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid rgba(0,180,216,.25);border-radius:14px;padding:18px;margin-bottom:20px}
 .pix-saldo-box .lbl{font-size:.75rem;color:var(--gelo);opacity:.85;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .pix-saldo-box .val{font-size:1.9rem;font-weight:700;color:var(--verde)}
-
 .pix-form .form-group{margin-bottom:14px}
 .pix-form label{font-size:.78rem;color:var(--cinza);display:block;margin-bottom:6px;letter-spacing:.5px}
 .pix-form input{width:100%;padding:13px 16px;background:rgba(255,255,255,.07);border:1.5px solid transparent;border-radius:11px;color:#fff;font-size:.95rem;transition:.22s}
@@ -184,8 +188,6 @@ input,button{font-family:inherit}
 .btn-pix-enviar{background:linear-gradient(45deg,var(--verde2),var(--verde));color:#fff}
 .btn-pix-pedir{background:linear-gradient(45deg,#1d4ed8,var(--azul));color:#fff}
 .pix-btns button:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
-
-/* chat pix */
 .chat-wrap{display:flex;flex-direction:column;height:100%}
 .chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;max-height:420px;padding-right:4px}
 .chat-msgs::-webkit-scrollbar{width:3px}
@@ -200,21 +202,32 @@ input,button{font-family:inherit}
 .msg-txt{color:var(--cinza);margin-top:3px}
 .msg-hora{font-size:.7rem;color:rgba(148,163,184,.5);margin-top:4px}
 
-/* ===== BOLSA ===== */
-.bolsa-item{background:var(--painel);border:1px solid var(--borda);border-radius:14px;padding:20px 24px;margin-bottom:12px;display:flex;align-items:center;gap:18px;transition:.22s}
-.bolsa-item:hover{border-color:var(--azul)}
-.bolsa-ticker-badge{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--azul),var(--bg3));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;text-align:center;line-height:1.2;flex-shrink:0}
-.bolsa-ticker{font-size:1.1rem;font-weight:700;color:var(--gelo)}
-.bolsa-preco{font-size:1.4rem;font-weight:700;color:var(--verde)}
-.bolsa-var{font-size:.8rem;color:var(--cinza);margin-top:2px}
-.bolsa-qtd{font-size:.85rem;color:var(--cinza);white-space:nowrap}
-.bolsa-acoes{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
-.btn-compra{padding:9px 18px;border:none;border-radius:9px;background:rgba(34,197,94,.15);color:var(--verde);font-weight:700;font-size:.85rem;cursor:pointer;border:1px solid rgba(34,197,94,.25);transition:.2s}
-.btn-venda{padding:9px 18px;border:none;border-radius:9px;background:rgba(239,68,68,.12);color:var(--vermelho);font-weight:700;font-size:.85rem;cursor:pointer;border:1px solid rgba(239,68,68,.2);transition:.2s}
-.btn-compra:hover{background:rgba(34,197,94,.3)}
-.btn-venda:hover{background:rgba(239,68,68,.25)}
+/* BOLSA — novo visual */
+.bolsa-grid{display:flex;flex-direction:column;gap:12px}
+.bolsa-item{background:var(--painel);border:1px solid var(--borda);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:18px;transition:.22s;position:relative;overflow:hidden}
+.bolsa-item:hover{border-color:var(--azul);background:rgba(0,180,216,.05)}
+.bolsa-ticker-badge{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--azul),var(--bg3));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;color:#fff;text-align:center;line-height:1.3;flex-shrink:0;white-space:pre-line}
+.bolsa-info{flex:1;min-width:0}
+.bolsa-ticker{font-size:1rem;font-weight:700;color:var(--gelo)}
+.bolsa-nome{font-size:.78rem;color:var(--cinza);margin-top:1px}
+.bolsa-preco-wrap{text-align:right;min-width:130px}
+.bolsa-preco{font-size:1.5rem;font-weight:700;transition:color .4s}
+.bolsa-preco.alta{color:var(--verde)}
+.bolsa-preco.baixa{color:var(--vermelho)}
+.bolsa-var{font-size:.78rem;margin-top:3px;display:flex;align-items:center;justify-content:flex-end;gap:4px;font-weight:600}
+.var-pos{color:var(--verde)}
+.var-neg{color:var(--vermelho)}
+.bolsa-mini{width:70px;height:36px;flex-shrink:0}
+.bolsa-qtd-tag{font-size:.78rem;color:var(--cinza);background:rgba(255,255,255,.06);border:1px solid var(--borda);border-radius:8px;padding:4px 10px;white-space:nowrap}
+.bolsa-acoes-wrap{display:flex;gap:8px;flex-shrink:0}
+.btn-compra{padding:9px 18px;border-radius:9px;background:rgba(34,197,94,.12);color:var(--verde);font-weight:700;font-size:.85rem;cursor:pointer;border:1px solid rgba(34,197,94,.25);transition:.2s}
+.btn-venda{padding:9px 18px;border-radius:9px;background:rgba(239,68,68,.1);color:var(--vermelho);font-weight:700;font-size:.85rem;cursor:pointer;border:1px solid rgba(239,68,68,.2);transition:.2s}
+.btn-compra:hover{background:rgba(34,197,94,.28)}
+.btn-venda:hover{background:rgba(239,68,68,.22)}
+.bolsa-flash{animation:flash .5s ease}
+@keyframes flash{0%{background:rgba(0,180,216,.15)}100%{background:transparent}}
 
-/* ===== CARTÃO ===== */
+/* CARTÃO */
 .cartao-vis{background:linear-gradient(135deg,var(--bg3) 0%,#00040a 100%);border:1px solid rgba(0,180,216,.3);border-radius:22px;padding:38px;max-width:440px;position:relative;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5)}
 .cartao-vis::before{content:'';position:absolute;right:-80px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,.2),transparent 70%)}
 .cartao-vis::after{content:'';position:absolute;left:-60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(0,52,102,.6),transparent 70%)}
@@ -230,7 +243,7 @@ input,button{font-family:inherit}
 .limite-box .ll{font-size:.75rem;color:var(--cinza);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .limite-box .lv{font-size:1.5rem;font-weight:700;color:var(--verde)}
 
-/* ===== METAS ===== */
+/* METAS */
 .meta-card{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);border-left:4px solid var(--verde);border-radius:14px;padding:22px;margin-bottom:14px}
 .meta-nome{font-size:1rem;font-weight:700;color:var(--gelo);margin-bottom:6px}
 .meta-vals{font-size:.88rem;color:var(--cinza);margin-bottom:12px}
@@ -241,7 +254,18 @@ input,button{font-family:inherit}
 .btn-nova-meta{width:100%;padding:14px;border:1.5px dashed rgba(0,180,216,.3);border-radius:14px;background:transparent;color:var(--azul);font-weight:700;cursor:pointer;transition:.22s;font-size:.95rem;margin-top:10px}
 .btn-nova-meta:hover{background:rgba(0,180,216,.1);border-color:var(--azul)}
 
-/* ===== CRIPTO ===== */
+/* GRÁFICO DE PIZZA */
+.pizza-wrap{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:24px;align-items:start}
+.pizza-canvas-wrap{background:var(--painel);border:1px solid var(--borda);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;align-items:center}
+.pizza-legenda{display:flex;flex-direction:column;gap:10px;margin-top:20px;width:100%}
+.pizza-leg-item{display:flex;align-items:center;gap:10px;font-size:.88rem}
+.pizza-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.pizza-leg-nome{flex:1;color:#e2e8f0}
+.pizza-leg-val{color:var(--gelo);font-weight:600}
+.pizza-leg-pct{color:var(--cinza);font-size:.75rem}
+.pizza-vazio{text-align:center;color:var(--cinza);padding:40px 20px;font-size:.9rem}
+
+/* CRIPTO */
 .cripto-header{background:linear-gradient(135deg,#1a0533,#2d0a66 50%,#0a1628);border:1px solid rgba(168,85,247,.35);border-radius:22px;padding:38px;margin-bottom:22px;position:relative;overflow:hidden}
 .cripto-header::before{content:'';position:absolute;inset:-50%;background:radial-gradient(circle at center,rgba(168,85,247,.07),transparent 60%);animation:rot 12s linear infinite}
 @keyframes rot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -279,9 +303,9 @@ button:disabled{opacity:.3!important;cursor:not-allowed!important;transform:none
 .chart-bar{background:linear-gradient(180deg,var(--roxo2),#7c3aed);flex:1;border-radius:3px 3px 0 0;min-height:4px;transition:.5s}
 .debug-h{font-family:monospace;font-size:.62rem;color:#6d28d9;padding:10px;background:#030712;border-radius:8px;word-break:break-all;margin-top:12px}
 
-/* ===== RESPONSIVO ===== */
+/* RESPONSIVO */
 @media(max-width:1100px){.cripto-grid{grid-template-columns:1fr}}
-@media(max-width:900px){.pix-wrap{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.cripto-acoes{grid-template-columns:1fr}.cripto-stats{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.pix-wrap{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.cripto-acoes{grid-template-columns:1fr}.cripto-stats{grid-template-columns:1fr 1fr}.pizza-wrap{grid-template-columns:1fr}}
 @media(max-width:700px){
   #dashboard{flex-direction:column}
   .sidebar{width:100%;flex-direction:row;overflow-x:auto}
@@ -292,24 +316,24 @@ button:disabled{opacity:.3!important;cursor:not-allowed!important;transform:none
   .btn-sair{white-space:nowrap}
   .main{padding:18px}
   .saldo-valor{font-size:2rem}
+  .bolsa-mini{display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- ==================== MODAL GENÉRICO ==================== -->
 <div id="modalBg" class="modal-bg hidden">
   <div class="modal" id="modalBox">
     <h3 id="modalTitulo"></h3>
     <div id="modalCorpo"></div>
-    <div class="modal-btns">
+    <div class="modal-btns" id="modalBtns">
       <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
       <button class="btn-confirmar" id="modalConfirmar">Confirmar</button>
     </div>
   </div>
 </div>
 
-<!-- ==================== TELA INICIAL ==================== -->
+<!-- INICIAL -->
 <div id="telaInicial">
   <div class="logo-hero">BANCO MINERVA</div>
   <div class="hero-sub">Magnata Ultimate Ecosystem</div>
@@ -320,17 +344,17 @@ button:disabled{opacity:.3!important;cursor:not-allowed!important;transform:none
   <div class="features">
     <div class="feat-card"><div class="ic">💸</div><h4>Controle Financeiro</h4><p>Organize seus gastos em tempo real.</p></div>
     <div class="feat-card"><div class="ic">🔒</div><h4>Segurança</h4><p>Proteção avançada para sua conta.</p></div>
-    <div class="feat-card"><div class="ic">📈</div><h4>Investimentos</h4><p>Acompanhe o mercado e invista.</p></div>
-    <div class="feat-card"><div class="ic">⚡</div><h4>PIX Instantâneo</h4><p>Transfira entre usuários em segundos.</p></div>
+    <div class="feat-card"><div class="ic">📈</div><h4>Investimentos</h4><p>Acompanhe o mercado ao vivo.</p></div>
+    <div class="feat-card"><div class="ic">⚡</div><h4>PIX Instantâneo</h4><p>Transfira entre usuários na hora.</p></div>
   </div>
 </div>
 
-<!-- ==================== CADASTRO ==================== -->
+<!-- CADASTRO -->
 <div id="telaCadastro" class="tela-form hidden">
   <div class="form-card">
     <div class="form-logo"><span>MINERVA</span><p>Crie sua conta gratuitamente</p></div>
     <h2>Nova Conta</h2>
-    <input id="cadUsuario" class="inp" type="text" placeholder="Usuário (será em maiúsculo)" autocomplete="off">
+    <input id="cadUsuario" class="inp" type="text" placeholder="Usuário (maiúsculo)" autocomplete="off">
     <input id="cadSenha" class="inp" type="password" placeholder="Senha" minlength="6" maxlength="16">
     <div class="inp-hint">De 6 a 16 caracteres</div>
     <button class="btn-form btn-verde" onclick="cadastrar()">Criar Conta</button>
@@ -339,7 +363,7 @@ button:disabled{opacity:.3!important;cursor:not-allowed!important;transform:none
   </div>
 </div>
 
-<!-- ==================== LOGIN ==================== -->
+<!-- LOGIN -->
 <div id="telaLogin" class="tela-form hidden">
   <div class="form-card">
     <div class="form-logo"><span>MINERVA</span><p>Acesse sua conta</p></div>
@@ -352,13 +376,10 @@ button:disabled{opacity:.3!important;cursor:not-allowed!important;transform:none
   </div>
 </div>
 
-<!-- ==================== DASHBOARD ==================== -->
+<!-- DASHBOARD -->
 <div id="dashboard" class="hidden">
   <div class="sidebar">
-    <div class="sb-logo">
-      <div class="nome">MINERVA</div>
-      <div class="sub">Digital Bank</div>
-    </div>
+    <div class="sb-logo"><div class="nome">MINERVA</div><div class="sub">Digital Bank</div></div>
     <div class="sb-user">
       <div class="sb-avatar" id="sbAvatar">?</div>
       <div class="sb-user-info">
@@ -382,172 +403,203 @@ button:disabled{opacity:.3!important;cursor:not-allowed!important;transform:none
 </div>
 
 <script>
-// ===================== ESTADO =====================
-let usuarios   = JSON.parse(localStorage.getItem('usuarios_minerva') || '{}');
-let logado     = null;
-let saldoVisivel = true;
-let omegaBlockchain = [];
-let omegaPreco = 2.54;
+// ============ ESTADO ============
+let usuarios = JSON.parse(localStorage.getItem('usuarios_minerva')||'{}');
+let logado = null, saldoVisivel = true, loopAtivo = false;
+let omegaBlockchain = [], omegaPreco = 2.54;
 const OMEGA_DIFIC = '00';
-let loopAtivo = false;
+let pizzaChart = null;
+
+// histórico de preços para mini-gráficos (últimos 20 ticks por ticker)
+let historicoPrecos = {};
 
 let mercado = {
-  'PETR4':   { preco: 38.50,  nome: 'Petrobras' },
-  'VALE3':   { preco: 65.20,  nome: 'Vale'       },
-  'ITUB4':   { preco: 33.15,  nome: 'Itaú'       },
-  'BTC/BRL': { preco: 355000, nome: 'Bitcoin'    },
+  'PETR4':   { preco:38.50,  precoRef:38.50,  nome:'Petrobras' },
+  'VALE3':   { preco:65.20,  precoRef:65.20,  nome:'Vale'      },
+  'ITUB4':   { preco:33.15,  precoRef:33.15,  nome:'Itaú'      },
+  'BTC/BRL': { preco:355000, precoRef:355000, nome:'Bitcoin'   },
 };
 
-// ===================== NOTIFICAÇÃO =====================
-function notif(msg, tipo='ok') {
-  const el = document.createElement('div');
-  el.className = `notif ${tipo}`;
-  const icons = {ok:'✅',erro:'❌',info:'ℹ️'};
-  el.innerHTML = `<span>${icons[tipo]||'ℹ️'}</span><span>${msg}</span>`;
+for(const t in mercado) historicoPrecos[t] = [mercado[t].preco];
+
+// ============ UTILS ============
+const fmt  = v => Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const hora = () => new Date().toLocaleTimeString('pt-BR');
+const parseValor = s => parseFloat(String(s).replace(/\./g,'').replace(',','.'));
+const salvar = () => localStorage.setItem('usuarios_minerva',JSON.stringify(usuarios));
+const gerarConta = () => String(Math.floor(10000+Math.random()*89999));
+const gerarAuth  = () => Math.random().toString(36).slice(2,10).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase();
+
+// ============ NOTIFICAÇÃO ============
+function notif(msg,tipo='ok'){
+  const el=document.createElement('div');
+  el.className=`notif ${tipo}`;
+  el.innerHTML=`<span>${{ok:'✅',erro:'❌',info:'ℹ️'}[tipo]||'ℹ️'}</span><span>${msg}</span>`;
   document.body.appendChild(el);
-  setTimeout(() => el.classList.add('show'), 50);
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, 4500);
+  setTimeout(()=>el.classList.add('show'),50);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);},4500);
 }
 
-// ===================== MODAL =====================
-let _modalCb = null;
-function modal(titulo, camposHTML, cb) {
-  document.getElementById('modalTitulo').textContent = titulo;
-  document.getElementById('modalCorpo').innerHTML = camposHTML;
-  _modalCb = cb;
-  document.getElementById('modalConfirmar').onclick = () => { cb && cb(); };
+// ============ MODAL ============
+let _modalCb=null;
+function modal(titulo,corpo,cb,ocultarBtns=false){
+  document.getElementById('modalTitulo').textContent=titulo;
+  document.getElementById('modalCorpo').innerHTML=corpo;
+  _modalCb=cb;
+  document.getElementById('modalConfirmar').onclick=()=>cb&&cb();
+  document.getElementById('modalBtns').style.display=ocultarBtns?'none':'flex';
   document.getElementById('modalBg').classList.remove('hidden');
-  const inp = document.querySelector('#modalBox input');
-  if (inp) setTimeout(() => inp.focus(), 100);
+  const inp=document.querySelector('#modalBox input');
+  if(inp) setTimeout(()=>inp.focus(),100);
 }
-function fecharModal() { document.getElementById('modalBg').classList.add('hidden'); }
+function fecharModal(){document.getElementById('modalBg').classList.add('hidden');}
 
-// ===================== NAVEGAÇÃO =====================
-function ir(id) {
-  ['telaInicial','telaLogin','telaCadastro'].forEach(t => {
-    const el = document.getElementById(t);
-    if (el) el.classList.add('hidden');
+// ============ NAVEGAÇÃO ============
+function ir(id){
+  ['telaInicial','telaLogin','telaCadastro'].forEach(t=>{
+    const el=document.getElementById(t); if(el) el.classList.add('hidden');
   });
-  document.getElementById(id).classList.remove('hidden');
+  const el=document.getElementById(id); if(el) el.classList.remove('hidden');
 }
 
-// ===================== UTILS =====================
-function fmt(v) { return Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function parseValor(s) { return parseFloat(String(s).replace(/\./g,'').replace(',','.')); }
-function salvar() { localStorage.setItem('usuarios_minerva', JSON.stringify(usuarios)); }
-function hora() { return new Date().toLocaleTimeString('pt-BR'); }
-function gerarConta() { return String(Math.floor(10000 + Math.random() * 89999)); }
-
-// ===================== CADASTRO =====================
-function cadastrar() {
-  const u = document.getElementById('cadUsuario').value.trim().toUpperCase();
-  const s = document.getElementById('cadSenha').value;
-  if (!u || !s)      return notif('Preencha todos os campos!','erro');
-  if (s.length < 6)  return notif('Senha mínima: 6 caracteres','erro');
-  if (s.length > 16) return notif('Senha máxima: 16 caracteres','erro');
-  if (usuarios[u])   return notif('Usuário já existe!','erro');
-
-  usuarios[u] = {
-    senha: s, conta: gerarConta(), saldo: 1500000,
-    historico: [], carteira: {}, pixChat: [], metas: [],
-    omegaSaldo: 0, omegaHistorico: [], bloqueado: false
-  };
-  salvar();
-  notif('Conta criada com sucesso! Faça login.');
-  ir('telaLogin');
-}
-
-// ===================== LOGIN =====================
-function login() {
-  const u = document.getElementById('loginUsuario').value.trim().toUpperCase();
-  const s = document.getElementById('loginSenha').value;
-  if (!u || !s) return notif('Preencha todos os campos!','erro');
-  if (!usuarios[u] || usuarios[u].senha !== s) return notif('Usuário ou senha incorretos!','erro');
-  if (usuarios[u].bloqueado) return notif('Conta bloqueada!','erro');
-
-  logado = u;
-  if (usuarios[logado].omegaSaldo === undefined) { usuarios[logado].omegaSaldo = 0; usuarios[logado].omegaHistorico = []; }
-
-  omegaBlockchain = [{ tipo:'SISTEMA', valor:0, timestamp:'--:--', hash:'0000omega_genesis_block_8888', hashAnterior:'0' }];
-  omegaPreco = 2.54;
-
-  document.getElementById('dashboard').classList.remove('hidden');
-  ir('___');
-
-  // sidebar info
-  document.getElementById('sbAvatar').textContent = u.charAt(0);
-  document.getElementById('sbNome').textContent = u;
-  document.getElementById('sbConta').textContent = 'Conta: ' + usuarios[u].conta;
-
-  renderAba('financeiro');
-  loopAtivo = true;
-  loopGlobal();
-  atualizarOnline();
-  notif(`Bem-vindo de volta, ${u}! 👋`);
-}
-
-function logout() {
-  logado = null; loopAtivo = false;
-  document.getElementById('dashboard').classList.add('hidden');
-  ir('telaInicial');
-  // reset botões nav
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('ativo'));
-  document.querySelectorAll('.nav-btn')[0]?.classList.add('ativo');
-}
-
-// ===================== SIDEBAR =====================
-function aba(btn, nome) {
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('ativo'));
+function aba(btn,nome){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
   btn.classList.add('ativo');
   renderAba(nome);
 }
-
-function atualizarOnline() {
-  const box = document.getElementById('sbOnline');
-  if (!box || !logado) return;
-  const nomes = Object.keys(usuarios);
-  if (!nomes.length) { box.innerHTML=''; return; }
-  box.innerHTML = `<div class="titulo">👥 Usuários</div>` +
-    nomes.map(n => {
-      const on = (n === logado);
-      return `<div class="online-item"><div class="${on?'dot-on':'dot-off'}"></div><span>${n}</span></div>`;
-    }).join('');
+function abaNav(nome){
+  const mapa=['financeiro','extrato','pix','metas','bolsa','cartao','cripto'];
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('ativo',mapa[i]===nome));
+  renderAba(nome);
 }
 
-// ===================== LOOP GLOBAL =====================
-function loopGlobal() {
-  if (!loopAtivo || !logado) return;
-  // Atualiza preços
-  for (const t in mercado) {
-    const d = (Math.random() - 0.5) * 0.06;
-    mercado[t].preco = Math.max(mercado[t].preco * (1 + d), 0.01);
-    const el = document.querySelector(`[data-ticker="${t}"]`);
-    if (el) el.textContent = 'R$ ' + fmt(mercado[t].preco);
-  }
-  // Saldo no card
-  const sv = document.querySelector('.saldo-valor');
-  if (sv && logado) {
-    sv.textContent = saldoVisivel ? 'R$ ' + fmt(usuarios[logado].saldo) : '••••••••';
-  }
-  const pe = document.getElementById('omega-preco-live');
-  if (pe) pe.textContent = '$ ' + omegaPreco.toFixed(2);
-
-  setTimeout(loopGlobal, 1200);
+// ============ AUTH ============
+function cadastrar(){
+  const u=document.getElementById('cadUsuario').value.trim().toUpperCase();
+  const s=document.getElementById('cadSenha').value;
+  if(!u||!s) return notif('Preencha todos os campos!','erro');
+  if(s.length<6) return notif('Senha mínima: 6 caracteres','erro');
+  if(usuarios[u]) return notif('Usuário já existe!','erro');
+  usuarios[u]={senha:s,conta:gerarConta(),saldo:1500000,historico:[],carteira:{},pixChat:[],metas:[],omegaSaldo:0,omegaHistorico:[],bloqueado:false};
+  salvar(); notif('Conta criada! Faça login.'); ir('telaLogin');
 }
 
-// ===================== RENDER ABA =====================
-function renderAba(nome) {
-  const el = document.getElementById('mainConteudo');
-  const d  = usuarios[logado];
+function login(){
+  const u=document.getElementById('loginUsuario').value.trim().toUpperCase();
+  const s=document.getElementById('loginSenha').value;
+  if(!u||!s) return notif('Preencha todos os campos!','erro');
+  if(!usuarios[u]||usuarios[u].senha!==s) return notif('Usuário ou senha incorretos!','erro');
+  if(usuarios[u].bloqueado) return notif('Conta bloqueada!','erro');
+  logado=u;
+  if(!usuarios[logado].omegaSaldo) usuarios[logado].omegaSaldo=0;
+  omegaBlockchain=[{tipo:'SISTEMA',valor:0,timestamp:'--:--',hash:'0000omega_genesis_block_8888',hashAnterior:'0'}];
+  omegaPreco=2.54;
+  document.getElementById('dashboard').classList.remove('hidden');
+  ir('___');
+  document.getElementById('sbAvatar').textContent=u.charAt(0);
+  document.getElementById('sbNome').textContent=u;
+  document.getElementById('sbConta').textContent='Conta: '+usuarios[u].conta;
+  renderAba('financeiro');
+  loopAtivo=true; loopGlobal(); atualizarOnline();
+  notif(`Bem-vindo de volta, ${u}! 👋`);
+}
 
-  if (nome === 'financeiro') {
-    el.innerHTML = `
+function logout(){
+  logado=null; loopAtivo=false;
+  if(pizzaChart){pizzaChart.destroy();pizzaChart=null;}
+  document.getElementById('dashboard').classList.add('hidden');
+  ir('telaInicial');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
+  document.querySelectorAll('.nav-btn')[0]?.classList.add('ativo');
+}
+
+function atualizarOnline(){
+  const box=document.getElementById('sbOnline');
+  if(!box||!logado) return;
+  const nomes=Object.keys(usuarios);
+  box.innerHTML=nomes.length?`<div class="titulo">👥 Usuários</div>`+nomes.map(n=>`<div class="online-item"><div class="${n===logado?'dot-on':'dot-off'}"></div><span>${n}</span></div>`).join(''):'';
+}
+
+// ============ LOOP GLOBAL ============
+function loopGlobal(){
+  if(!loopAtivo||!logado) return;
+  for(const t in mercado){
+    const ant = mercado[t].preco;
+    const d=(Math.random()-.5)*0.06;
+    mercado[t].preco=Math.max(mercado[t].preco*(1+d),0.01);
+    const novo = mercado[t].preco;
+
+    // histórico para mini-gráfico
+    historicoPrecos[t].push(novo);
+    if(historicoPrecos[t].length>20) historicoPrecos[t].shift();
+
+    // atualiza preço na bolsa com cor e flash
+    const el=document.querySelector(`[data-ticker="${t}"]`);
+    if(el){
+      el.textContent='R$ '+fmt(novo);
+      el.className='bolsa-preco '+(novo>=ant?'alta':'baixa');
+      const row=el.closest('.bolsa-item');
+      if(row){row.classList.remove('bolsa-flash');void row.offsetWidth;row.classList.add('bolsa-flash');}
+    }
+
+    // atualiza variação %
+    const varEl=document.querySelector(`[data-var="${t}"]`);
+    if(varEl){
+      const pct=((novo-mercado[t].precoRef)/mercado[t].precoRef*100);
+      const sinal=pct>=0?'+':'';
+      varEl.className='bolsa-var';
+      varEl.innerHTML=`<span class="${pct>=0?'var-pos':'var-neg'}">${sinal}${pct.toFixed(2)}%</span>`;
+    }
+
+    // atualiza mini canvas
+    const cv=document.querySelector(`[data-mini="${t}"]`);
+    if(cv) desenharMini(cv,historicoPrecos[t]);
+  }
+
+  // saldo no card financeiro
+  const sv=document.querySelector('.saldo-valor');
+  if(sv) sv.textContent=saldoVisivel?'R$ '+fmt(usuarios[logado].saldo):'••••••••';
+
+  // preço omega
+  const pe=document.getElementById('omega-preco-live');
+  if(pe) pe.textContent='$ '+omegaPreco.toFixed(2);
+
+  setTimeout(loopGlobal,1000);
+}
+
+// mini gráfico de linha (canvas 2d simples)
+function desenharMini(cv,dados){
+  const ctx=cv.getContext('2d');
+  const w=cv.width,h=cv.height;
+  ctx.clearRect(0,0,w,h);
+  if(dados.length<2) return;
+  const min=Math.min(...dados), max=Math.max(...dados), range=max-min||1;
+  const subindo=dados[dados.length-1]>=dados[0];
+  ctx.strokeStyle=subindo?'#22c55e':'#ef4444';
+  ctx.lineWidth=1.5;
+  ctx.beginPath();
+  dados.forEach((v,i)=>{
+    const x=(i/(dados.length-1))*w;
+    const y=h-((v-min)/range)*(h-4)-2;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+// ============ RENDER ABAS ============
+function renderAba(nome){
+  const el=document.getElementById('mainConteudo');
+  const d=usuarios[logado];
+  if(pizzaChart){pizzaChart.destroy();pizzaChart=null;}
+
+  if(nome==='financeiro'){
+    el.innerHTML=`
       <div class="pg-header">
         <div><div class="pg-titulo">Olá, ${logado} 👋</div><div class="pg-sub">${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})}</div></div>
         <span class="badge badge-verde">● Conta ativa</span>
       </div>
       <div class="card-saldo">
-        <div class="saldo-label">Saldo disponível <button class="btn-olho" onclick="toggleSaldo()" title="Mostrar/ocultar">👁</button></div>
+        <div class="saldo-label">Saldo disponível <button class="btn-olho" onclick="toggleSaldo()">👁</button></div>
         <div class="saldo-valor">R$ ${fmt(d.saldo)}</div>
         <div class="saldo-conta">Conta ${d.conta} · Agência 0001</div>
         <div class="acoes">
@@ -561,68 +613,54 @@ function renderAba(nome) {
       <div class="grid3" style="margin-bottom:22px">
         <div class="stat-box"><div class="sl">Conta</div><div class="sv" style="font-size:1.1rem">${d.conta}</div></div>
         <div class="stat-box"><div class="sl">Metas ativas</div><div class="sv">${d.metas.filter(m=>!m.concluida).length}</div></div>
-        <div class="stat-box"><div class="sl">Omega Ω</div><div class="sv" style="color:#c084fc">${(d.omegaSaldo||0).toFixed(2)}</div></div>
+        <div class="stat-box"><div class="sl">Omega Ω</div><div class="sv" style="color:#c084fc">${(d.omegaSaldo||0).toFixed(4)}</div></div>
       </div>
       <div class="painel">
-        <div class="painel-h">📋 Últimas movimentações</div>
-        ${d.historico.length === 0
-          ? '<div style="color:var(--cinza);text-align:center;padding:30px">Nenhuma movimentação ainda.</div>'
-          : d.historico.slice(-8).reverse().map(h => {
-              const entrada = h.includes('ADICIONADO') || h.includes('PIX RECEBIDO') || h.includes('VENDA');
-              return `<div class="ext-item">
-                <div class="ext-ic ${entrada?'ic-e':'ic-s'}">${entrada?'⬆️':'⬇️'}</div>
-                <div class="ext-info"><div class="ext-desc">${h.replace(/\[.*?\]\s*/,'')}</div><div class="ext-data">${h.match(/\[(.*?)\]/)?.[1]||''}</div></div>
-                <div class="ext-val ${entrada?'val-pos':'val-neg'}">${entrada?'+':'-'}</div>
-              </div>`;
-            }).join('')}
+        <div class="painel-h">📋 Últimas movimentações <span style="font-size:.7rem;color:var(--azul);cursor:pointer;font-weight:400" onclick="abaNav('extrato')">ver tudo →</span></div>
+        ${d.historico.length===0
+          ?'<div style="color:var(--cinza);text-align:center;padding:30px">Nenhuma movimentação ainda.</div>'
+          :d.historico.slice(-6).reverse().map(h=>renderExtItem(h)).join('')}
       </div>`;
   }
 
-  else if (nome === 'extrato') {
-    el.innerHTML = `
-      <div class="pg-header"><div class="pg-titulo">📋 Extrato Completo</div></div>
-      <div class="painel">
-        <div class="painel-h">Todas as movimentações</div>
-        ${d.historico.length === 0
-          ? '<div style="color:var(--cinza);text-align:center;padding:40px">Nenhuma movimentação ainda.</div>'
-          : [...d.historico].reverse().map(h => {
-              const pos = h.includes('ADICIONADO') || h.includes('PIX RECEBIDO') || h.includes('VENDA');
-              return `<div class="ext-item">
-                <div class="ext-ic ${pos?'ic-e':'ic-s'}">${pos?'⬆️':'⬇️'}</div>
-                <div class="ext-info"><div class="ext-desc">${h.replace(/\[.*?\]\s*/,'')}</div><div class="ext-data">${h.match(/\[(.*?)\]/)?.[1]||''}</div></div>
-              </div>`;
-            }).join('')}
+  else if(nome==='extrato'){
+    // monta dados do gráfico de pizza a partir do histórico
+    const cats = contarCategorias(d.historico);
+    el.innerHTML=`
+      <div class="pg-header"><div><div class="pg-titulo">📋 Extrato & Gastos</div><div class="pg-sub">Clique em qualquer transação para ver o comprovante</div></div></div>
+      <div class="pizza-wrap">
+        <div class="painel" style="grid-column:1">
+          <div class="painel-h">Todas as movimentações</div>
+          ${d.historico.length===0
+            ?'<div style="color:var(--cinza);text-align:center;padding:40px">Nenhuma movimentação ainda.</div>'
+            :[...d.historico].reverse().map(h=>renderExtItem(h,true)).join('')}
+        </div>
+        <div>
+          <div class="pizza-canvas-wrap">
+            <div class="painel-h" style="margin-bottom:10px">🍕 Gastos por categoria</div>
+            ${cats.total>0
+              ?`<canvas id="pizzaCanvas" width="200" height="200"></canvas>
+                <div class="pizza-legenda" id="pizzaLegenda"></div>`
+              :`<div class="pizza-vazio">Faça transações para ver<br>o gráfico de gastos aparecer aqui.</div>`}
+          </div>
+        </div>
       </div>`;
+    if(cats.total>0) setTimeout(()=>renderPizza(cats),50);
   }
 
-  else if (nome === 'pix') {
-    const msgs = d.pixChat || [];
-    el.innerHTML = `
+  else if(nome==='pix'){
+    const msgs=d.pixChat||[];
+    el.innerHTML=`
       <div class="pg-header"><div><div class="pg-titulo">⚡ PIX ao Vivo</div><div class="pg-sub">Transferências instantâneas entre usuários</div></div></div>
       <div class="pix-wrap">
         <div>
-          <div class="pix-chave-box">
-            <div class="lbl">Sua chave PIX</div>
-            <div class="chave">${logado}</div>
-          </div>
-          <div class="pix-saldo-box">
-            <div class="lbl">Saldo disponível</div>
-            <div class="val">R$ ${fmt(d.saldo)}</div>
-          </div>
+          <div class="pix-chave-box"><div class="lbl">Sua chave PIX</div><div class="chave">${logado}</div></div>
+          <div class="pix-saldo-box"><div class="lbl">Saldo disponível</div><div class="val">R$ ${fmt(d.saldo)}</div></div>
           <div class="painel pix-form">
             <div class="painel-h">Enviar / Pedir PIX</div>
-            <div class="form-group">
-              <label>Usuário destino</label>
-              <input id="pixDestino" type="text" placeholder="Nome do usuário">
-            </div>
-            <div class="form-group">
-              <label>Valor</label>
-              <input id="pixValor" type="text" placeholder="0,00">
-            </div>
-            <div class="form-group">
-              <label>Mensagem (opcional)</label>
-              <input id="pixMensagem" type="text" placeholder="Ex: Almoço, obrigado!">
-            </div>
+            <div class="form-group"><label>Usuário destino</label><input id="pixDestino" type="text" placeholder="Nome do usuário"></div>
+            <div class="form-group"><label>Valor</label><input id="pixValor" type="text" placeholder="0,00"></div>
+            <div class="form-group"><label>Mensagem (opcional)</label><input id="pixMensagem" type="text" placeholder="Ex: Almoço, obrigado!"></div>
             <div class="pix-btns">
               <button class="btn-pix-enviar" onclick="enviarPix()">⚡ Enviar PIX</button>
               <button class="btn-pix-pedir" onclick="pedirPix()">📲 Pedir PIX</button>
@@ -632,9 +670,9 @@ function renderAba(nome) {
         <div class="painel chat-wrap">
           <div class="painel-h">💬 Chat PIX ao vivo</div>
           <div class="chat-msgs" id="chatPix">
-            ${msgs.length === 0
-              ? '<div style="color:var(--cinza);text-align:center;padding:30px;font-size:.9rem">Nenhuma mensagem ainda.</div>'
-              : msgs.slice(-20).map(m => `
+            ${msgs.length===0
+              ?'<div style="color:var(--cinza);text-align:center;padding:30px;font-size:.9rem">Nenhuma mensagem ainda.</div>'
+              :msgs.slice(-20).map(m=>`
                 <div class="msg msg-${m.tipo==='chat-enviado'?'env':m.tipo==='chat-recebido'?'rec':'ped'}">
                   <div><span class="msg-de">${m.de}</span> → <span class="msg-val">R$ ${m.valor}</span></div>
                   <div class="msg-txt">${m.mensagem}</div>
@@ -643,57 +681,70 @@ function renderAba(nome) {
           </div>
         </div>
       </div>`;
-    // scroll chat p/ baixo
-    setTimeout(() => { const c = document.getElementById('chatPix'); if(c) c.scrollTop = c.scrollHeight; }, 50);
+    setTimeout(()=>{const c=document.getElementById('chatPix');if(c)c.scrollTop=c.scrollHeight;},50);
   }
 
-  else if (nome === 'metas') {
-    el.innerHTML = `
+  else if(nome==='metas'){
+    el.innerHTML=`
       <div class="pg-header"><div class="pg-titulo">🎯 Minhas Metas</div></div>
       <div style="max-width:700px">
-        ${d.metas.length === 0
-          ? '<div style="color:var(--cinza);text-align:center;padding:40px">Nenhuma meta criada ainda.</div>'
-          : d.metas.map((m,i) => {
-              const p = Math.min((m.atual/m.valor)*100,100);
-              return `<div class="meta-card">
-                <div class="meta-nome">${m.nome}</div>
-                <div class="meta-vals">R$ <span>${fmt(m.atual)}</span> / R$ <span>${fmt(m.valor)}</span></div>
-                <div class="progress"><div class="progress-fill" style="width:${p}%"></div></div>
-                ${m.concluida ? '<div class="meta-ok">✅ Concluída!</div>'
-                  : `<button style="margin-top:10px;padding:8px 18px;border:1px solid var(--azul);background:transparent;color:var(--azul);border-radius:9px;cursor:pointer;font-size:.82rem;font-weight:600" onclick="modalAporte(${i})">+ Aportar</button>`}
-              </div>`;
-            }).join('')}
+        ${d.metas.length===0
+          ?'<div style="color:var(--cinza);text-align:center;padding:40px">Nenhuma meta criada ainda.</div>'
+          :d.metas.map((m,i)=>{
+            const p=Math.min((m.atual/m.valor)*100,100);
+            return `<div class="meta-card">
+              <div class="meta-nome">${m.nome}</div>
+              <div class="meta-vals">R$ <span>${fmt(m.atual)}</span> / R$ <span>${fmt(m.valor)}</span></div>
+              <div class="progress"><div class="progress-fill" style="width:${p}%"></div></div>
+              ${m.concluida?'<div class="meta-ok">✅ Concluída!</div>'
+                :`<button style="margin-top:10px;padding:8px 18px;border:1px solid var(--azul);background:transparent;color:var(--azul);border-radius:9px;cursor:pointer;font-size:.82rem;font-weight:600" onclick="modalAporte(${i})">+ Aportar</button>`}
+            </div>`;
+          }).join('')}
         <button class="btn-nova-meta" onclick="modalNovaMeta()">+ Nova Meta</button>
       </div>`;
   }
 
-  else if (nome === 'bolsa') {
-    el.innerHTML = `
-      <div class="pg-header"><div><div class="pg-titulo">📈 Bolsa B3</div><div class="pg-sub">Preços atualizando em tempo real</div></div></div>
-      ${Object.entries(mercado).map(([t,m]) => `
-        <div class="bolsa-item">
-          <div class="bolsa-ticker-badge">${t.replace('/','\n')}</div>
-          <div style="flex:1">
-            <div class="bolsa-ticker">${t} <span style="color:var(--cinza);font-size:.8rem;font-weight:400">${m.nome}</span></div>
-            <div class="bolsa-preco" data-ticker="${t}">R$ ${fmt(m.preco)}</div>
-          </div>
-          <div class="bolsa-qtd">Em carteira: <strong>${d.carteira[t]||0}</strong></div>
-          <div class="bolsa-acoes">
-            <button class="btn-compra" onclick="modalTrade('${t}','C')">Comprar</button>
-            <button class="btn-venda" onclick="modalTrade('${t}','V')">Vender</button>
-          </div>
-        </div>`).join('')}`;
+  else if(nome==='bolsa'){
+    el.innerHTML=`
+      <div class="pg-header"><div><div class="pg-titulo">📈 Bolsa B3</div><div class="pg-sub">Preços e variações atualizando a cada segundo</div></div></div>
+      <div class="bolsa-grid">
+        ${Object.entries(mercado).map(([t,m])=>{
+          const pct=((m.preco-m.precoRef)/m.precoRef*100);
+          const sinal=pct>=0?'+':'';
+          return `<div class="bolsa-item">
+            <div class="bolsa-ticker-badge">${t.replace('/','\n')}</div>
+            <div class="bolsa-info">
+              <div class="bolsa-ticker">${t}</div>
+              <div class="bolsa-nome">${m.nome}</div>
+            </div>
+            <canvas class="bolsa-mini" data-mini="${t}" width="70" height="36"></canvas>
+            <div class="bolsa-preco-wrap">
+              <div class="bolsa-preco ${pct>=0?'alta':'baixa'}" data-ticker="${t}">R$ ${fmt(m.preco)}</div>
+              <div class="bolsa-var" data-var="${t}"><span class="${pct>=0?'var-pos':'var-neg'}">${sinal}${pct.toFixed(2)}%</span></div>
+            </div>
+            <div class="bolsa-qtd-tag">Carteira: <strong>${d.carteira[t]||0}</strong></div>
+            <div class="bolsa-acoes-wrap">
+              <button class="btn-compra" onclick="modalTrade('${t}','C')">Comprar</button>
+              <button class="btn-venda" onclick="modalTrade('${t}','V')">Vender</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    // desenha mini-gráficos iniciais
+    setTimeout(()=>{
+      for(const t in mercado){
+        const cv=document.querySelector(`[data-mini="${t}"]`);
+        if(cv) desenharMini(cv,historicoPrecos[t]);
+      }
+    },50);
   }
 
-  else if (nome === 'cartao') {
-    const num = (d.conta + '0000').padEnd(16,'0').replace(/(.{4})/g,'$1 ').trim();
-    el.innerHTML = `
+  else if(nome==='cartao'){
+    const num=(d.conta+'0000').padEnd(16,'0').replace(/(.{4})/g,'$1 ').trim();
+    el.innerHTML=`
       <div class="pg-header"><div class="pg-titulo">💳 Meu Cartão</div></div>
       <div class="cartao-vis">
-        <div class="cartao-topo">
-          <div class="cartao-bandeira">MINERVA BLACK</div>
-          <div class="cartao-chip">💳</div>
-        </div>
+        <div class="cartao-topo"><div class="cartao-bandeira">MINERVA BLACK</div><div class="cartao-chip">💳</div></div>
         <div class="cartao-num">${num}</div>
         <div class="cartao-rodape">
           <div class="campo"><div class="lbl">Titular</div><div class="val">${logado}</div></div>
@@ -709,181 +760,288 @@ function renderAba(nome) {
       </div>`;
   }
 
-  else if (nome === 'cripto') {
-    renderCripto();
+  else if(nome==='cripto') renderCripto();
+}
+
+// ============ EXTRATO ITEM ============
+function renderExtItem(h, clicavel=false){
+  const pos=h.includes('ADICIONADO')||h.includes('PIX RECEBIDO')||h.includes('VENDA');
+  const hora=h.match(/\[(.*?)\]/)?.[1]||'';
+  const desc=h.replace(/\[.*?\]\s*/,'');
+  const onclick=clicavel?`onclick="verComprovante('${encodeURIComponent(h)}')"` :'';
+  return `<div class="ext-item" ${onclick}>
+    <div class="ext-ic ${pos?'ic-e':'ic-s'}">${pos?'⬆️':'⬇️'}</div>
+    <div class="ext-info"><div class="ext-desc">${desc}</div><div class="ext-data">${hora}</div></div>
+    ${clicavel?'<span class="ext-ver">ver comprovante</span>':''}
+  </div>`;
+}
+
+// ============ COMPROVANTE ============
+function verComprovante(hEnc){
+  const h=decodeURIComponent(hEnc);
+  const pos=h.includes('ADICIONADO')||h.includes('PIX RECEBIDO')||h.includes('VENDA');
+  const hora=h.match(/\[(.*?)\]/)?.[1]||hora();
+  const desc=h.replace(/\[.*?\]\s*/,'');
+
+  // extrai valor
+  const mVal=h.match(/R\$\s*([\d.,]+)/);
+  const valorStr=mVal?'R$ '+mVal[1]:'—';
+
+  // tipo bonito
+  let tipo='Movimentação', icone='💰';
+  if(h.includes('PIX ENVIADO')){ tipo='PIX Enviado'; icone='⚡';}
+  else if(h.includes('PIX RECEBIDO')){ tipo='PIX Recebido'; icone='⚡';}
+  else if(h.includes('ADICIONADO')){ tipo='Depósito'; icone='➕';}
+  else if(h.includes('SAQUE')){ tipo='Saque'; icone='➖';}
+  else if(h.includes('COMPRA')){ tipo='Compra de Ativo'; icone='📈';}
+  else if(h.includes('VENDA')){ tipo='Venda de Ativo'; icone='📊';}
+  else if(h.includes('APORTE')){ tipo='Aporte em Meta'; icone='🎯';}
+
+  const auth=gerarAuth();
+  const data=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+  const corpo=`
+    <div class="comprovante">
+      <div class="comp-logo"><span>MINERVA</span><p>Digital Bank</p></div>
+      <div class="comp-status">
+        <div class="comp-check">${icone}</div>
+        <h4>Transação realizada</h4>
+      </div>
+      <div class="comp-valor-big">${valorStr}</div>
+      <div class="comp-tipo">${tipo}</div>
+      <div class="comp-linha"><span class="cl">Descrição</span><span class="cv">${desc}</span></div>
+      <div class="comp-linha"><span class="cl">Horário</span><span class="cv">${hora}</span></div>
+      <div class="comp-linha"><span class="cl">Data</span><span class="cv">${data}</span></div>
+      <div class="comp-linha"><span class="cl">Conta origem</span><span class="cv">${logado} · ${usuarios[logado].conta}</span></div>
+      <div class="comp-linha"><span class="cl">Agência</span><span class="cv">0001 · Minerva Digital</span></div>
+      <div class="comp-linha"><span class="cl">Tipo</span><span class="cv">${pos?'Crédito':'Débito'}</span></div>
+      <div class="comp-codigo"><small>Código de autenticação</small>${auth}-${Date.now().toString(36).toUpperCase()}</div>
+      <button class="btn-imprimir" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+    </div>`;
+
+  modal('',corpo,null,true);
+  // adiciona botão fechar no topo
+  setTimeout(()=>{
+    const btns=document.getElementById('modalBtns');
+    btns.style.display='flex';
+    btns.innerHTML=`<button class="btn-cancelar" style="flex:1" onclick="fecharModal()">← Fechar</button>`;
+  },10);
+}
+
+// ============ GRÁFICO DE PIZZA ============
+function contarCategorias(historico){
+  const cats={};
+  let total=0;
+  historico.forEach(h=>{
+    const saida=!h.includes('ADICIONADO')&&!h.includes('PIX RECEBIDO')&&!h.includes('VENDA');
+    if(!saida) return;
+    const mVal=h.match(/R\$\s*([\d.,]+)/);
+    if(!mVal) return;
+    const v=parseFloat(mVal[1].replace(/\./g,'').replace(',','.'));
+    if(isNaN(v)||v<=0) return;
+    let cat='Outros';
+    if(h.includes('PIX')) cat='PIX Enviado';
+    else if(h.includes('SAQUE')) cat='Saques';
+    else if(h.includes('COMPRA')) cat='Investimentos';
+    else if(h.includes('APORTE')) cat='Metas';
+    cats[cat]=(cats[cat]||0)+v;
+    total+=v;
+  });
+  return {cats,total};
+}
+
+function renderPizza({cats}){
+  const cv=document.getElementById('pizzaCanvas');
+  if(!cv) return;
+  const cores=['#00B4D8','#22c55e','#a855f7','#f59e0b','#ef4444','#90E0EF'];
+  const labels=Object.keys(cats);
+  const vals=Object.values(cats);
+  const totalV=vals.reduce((a,b)=>a+b,0);
+
+  if(pizzaChart) pizzaChart.destroy();
+  pizzaChart=new Chart(cv,{
+    type:'doughnut',
+    data:{
+      labels,
+      datasets:[{data:vals,backgroundColor:cores.slice(0,labels.length),borderColor:'transparent',borderWidth:0,hoverOffset:8}]
+    },
+    options:{
+      cutout:'65%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`R$ ${fmt(ctx.raw)} (${((ctx.raw/totalV)*100).toFixed(1)}%)`}}},
+      animation:{duration:800}
+    }
+  });
+
+  const leg=document.getElementById('pizzaLegenda');
+  if(leg){
+    leg.innerHTML=labels.map((l,i)=>`
+      <div class="pizza-leg-item">
+        <div class="pizza-dot" style="background:${cores[i]}"></div>
+        <div class="pizza-leg-nome">${l}</div>
+        <div class="pizza-leg-val">R$ ${fmt(vals[i])}</div>
+        <div class="pizza-leg-pct">${((vals[i]/totalV)*100).toFixed(1)}%</div>
+      </div>`).join('');
   }
 }
 
-// ========== TOGGLE SALDO ==========
-function toggleSaldo() {
-  saldoVisivel = !saldoVisivel;
-  const sv = document.querySelector('.saldo-valor');
-  if (sv) sv.textContent = saldoVisivel ? 'R$ ' + fmt(usuarios[logado].saldo) : '••••••••';
+// ============ TOGGLE SALDO ============
+function toggleSaldo(){
+  saldoVisivel=!saldoVisivel;
+  const sv=document.querySelector('.saldo-valor');
+  if(sv) sv.textContent=saldoVisivel?'R$ '+fmt(usuarios[logado].saldo):'••••••••';
 }
 
-function abaNav(nome) {
-  const btns = document.querySelectorAll('.nav-btn');
-  const mapa = ['financeiro','extrato','pix','metas','bolsa','cartao','cripto'];
-  btns.forEach((b,i) => b.classList.toggle('ativo', mapa[i]===nome));
-  renderAba(nome);
-}
-
-// ========== DEPOSITO / SAQUE (modal) ==========
-function modalDeposito() {
+// ============ DEPOSITO / SAQUE ============
+function modalDeposito(){
   modal('Adicionar Dinheiro',
     `<label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Valor (R$)</label>
      <input id="mInp" class="inp" type="text" placeholder="0,00" style="margin-bottom:0">`,
-    () => {
-      const v = parseValor(document.getElementById('mInp').value);
-      if (isNaN(v) || v <= 0) return notif('Valor inválido!','erro');
-      if (v > 1000000) return notif('Limite: R$ 1.000.000 por operação','erro');
-      usuarios[logado].saldo += v;
-      usuarios[logado].historico.push(`[${hora()}] ADICIONADO: +R$ ${fmt(v)}`);
+    ()=>{
+      const v=parseValor(document.getElementById('mInp').value);
+      if(isNaN(v)||v<=0) return notif('Valor inválido!','erro');
+      if(v>1000000) return notif('Limite: R$ 1.000.000 por operação','erro');
+      usuarios[logado].saldo+=v;
+      const reg=`[${hora()}] ADICIONADO: +R$ ${fmt(v)}`;
+      usuarios[logado].historico.push(reg);
       salvar(); fecharModal(); renderAba('financeiro');
-      notif(`+R$ ${fmt(v)} adicionado com sucesso!`);
+      notif(`+R$ ${fmt(v)} adicionado!`);
+      setTimeout(()=>verComprovante(encodeURIComponent(reg)),400);
     });
 }
 
-function modalSaque() {
+function modalSaque(){
   modal('Retirar Dinheiro',
     `<label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Valor (R$)</label>
      <input id="mInp" class="inp" type="text" placeholder="0,00" style="margin-bottom:0">`,
-    () => {
-      const v = parseValor(document.getElementById('mInp').value);
-      if (isNaN(v) || v <= 0) return notif('Valor inválido!','erro');
-      if (v > usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
-      usuarios[logado].saldo -= v;
-      usuarios[logado].historico.push(`[${hora()}] SAQUE: -R$ ${fmt(v)}`);
+    ()=>{
+      const v=parseValor(document.getElementById('mInp').value);
+      if(isNaN(v)||v<=0) return notif('Valor inválido!','erro');
+      if(v>usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
+      usuarios[logado].saldo-=v;
+      const reg=`[${hora()}] SAQUE: -R$ ${fmt(v)}`;
+      usuarios[logado].historico.push(reg);
       salvar(); fecharModal(); renderAba('financeiro');
-      notif(`-R$ ${fmt(v)} retirado com sucesso!`);
+      notif(`-R$ ${fmt(v)} retirado!`);
+      setTimeout(()=>verComprovante(encodeURIComponent(reg)),400);
     });
 }
 
-// ========== PIX ==========
-function enviarPix() {
-  const dest = document.getElementById('pixDestino').value.trim().toUpperCase();
-  const valS = document.getElementById('pixValor').value.trim();
-  const msg  = document.getElementById('pixMensagem').value.trim() || 'PIX enviado';
-
-  if (!dest || !valS) return notif('Preencha destino e valor!','erro');
-  if (!usuarios[dest]) return notif('Usuário não encontrado!','erro');
-  if (dest === logado) return notif('Não pode enviar PIX para si mesmo!','erro');
-
-  const v = parseValor(valS);
-  if (isNaN(v) || v <= 0) return notif('Valor inválido! Ex: 1000,50','erro');
-  if (v > usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
-
-  usuarios[logado].saldo -= v;
-  usuarios[dest].saldo   += v;
-
-  const agora = hora();
-  usuarios[logado].historico.push(`[${agora}] PIX ENVIADO para ${dest}: -R$ ${fmt(v)}`);
+// ============ PIX ============
+function enviarPix(){
+  const dest=document.getElementById('pixDestino').value.trim().toUpperCase();
+  const valS=document.getElementById('pixValor').value.trim();
+  const msg=document.getElementById('pixMensagem').value.trim()||'PIX enviado';
+  if(!dest||!valS) return notif('Preencha destino e valor!','erro');
+  if(!usuarios[dest]) return notif('Usuário não encontrado!','erro');
+  if(dest===logado) return notif('Não pode enviar para si mesmo!','erro');
+  const v=parseValor(valS);
+  if(isNaN(v)||v<=0) return notif('Valor inválido!','erro');
+  if(v>usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
+  usuarios[logado].saldo-=v;
+  usuarios[dest].saldo+=v;
+  const agora=hora();
+  const reg=`[${agora}] PIX ENVIADO para ${dest}: -R$ ${fmt(v)}`;
+  usuarios[logado].historico.push(reg);
   usuarios[dest].historico.push(`[${agora}] PIX RECEBIDO de ${logado}: +R$ ${fmt(v)}`);
-
-  const mc = { de: logado, para: dest, valor: fmt(v), mensagem: msg, data: agora };
-  usuarios[logado].pixChat.push({ ...mc, tipo: 'chat-enviado' });
-  usuarios[dest].pixChat.push({  ...mc, tipo: 'chat-recebido' });
-
+  const mc={de:logado,para:dest,valor:fmt(v),mensagem:msg,data:agora};
+  usuarios[logado].pixChat.push({...mc,tipo:'chat-enviado'});
+  usuarios[dest].pixChat.push({...mc,tipo:'chat-recebido'});
   salvar();
   notif(`⚡ PIX de R$ ${fmt(v)} enviado para ${dest}!`);
   renderAba('pix');
+  setTimeout(()=>verComprovante(encodeURIComponent(reg)),600);
 }
 
-function pedirPix() {
-  const dest = document.getElementById('pixDestino').value.trim().toUpperCase();
-  const valS = document.getElementById('pixValor').value.trim();
-  const msg  = document.getElementById('pixMensagem').value.trim() || 'Me manda um PIX!';
-
-  if (!dest || !valS) return notif('Preencha destino e valor!','erro');
-  if (!usuarios[dest]) return notif('Usuário não encontrado!','erro');
-
-  const v = parseValor(valS);
-  if (isNaN(v) || v <= 0) return notif('Valor inválido!','erro');
-
-  const agora = hora();
-  const mc = { de: logado, para: dest, valor: fmt(v), mensagem: `📲 PEDIDO: ${msg}`, data: agora, tipo: 'chat-pedido' };
+function pedirPix(){
+  const dest=document.getElementById('pixDestino').value.trim().toUpperCase();
+  const valS=document.getElementById('pixValor').value.trim();
+  const msg=document.getElementById('pixMensagem').value.trim()||'Me manda um PIX!';
+  if(!dest||!valS) return notif('Preencha destino e valor!','erro');
+  if(!usuarios[dest]) return notif('Usuário não encontrado!','erro');
+  const v=parseValor(valS);
+  if(isNaN(v)||v<=0) return notif('Valor inválido!','erro');
+  const agora=hora();
+  const mc={de:logado,para:dest,valor:fmt(v),mensagem:`📲 PEDIDO: ${msg}`,data:agora,tipo:'chat-pedido'};
   usuarios[logado].pixChat.push(mc);
   usuarios[dest].pixChat.push(mc);
   usuarios[dest].historico.push(`[${agora}] ${logado} PEDIU PIX: R$ ${fmt(v)} | ${msg}`);
-
   salvar();
   notif(`📲 Pedido de R$ ${fmt(v)} enviado para ${dest}!`,'info');
   renderAba('pix');
 }
 
-// ========== METAS ==========
-function modalNovaMeta() {
+// ============ METAS ============
+function modalNovaMeta(){
   modal('Nova Meta',
-    `<label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Nome da meta</label>
+    `<label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Nome</label>
      <input id="mNome" class="inp" type="text" placeholder="Ex: Viagem, Carro..." style="margin-bottom:14px">
      <label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Valor alvo (R$)</label>
      <input id="mValor" class="inp" type="text" placeholder="0,00" style="margin-bottom:0">`,
-    () => {
-      const nome = document.getElementById('mNome').value.trim();
-      const v    = parseValor(document.getElementById('mValor').value);
-      if (!nome || isNaN(v) || v <= 0) return notif('Dados inválidos!','erro');
-      usuarios[logado].metas.push({ nome, valor: v, atual: 0, concluida: false });
-      salvar(); fecharModal(); renderAba('metas');
-      notif('Meta criada!');
+    ()=>{
+      const nome=document.getElementById('mNome').value.trim();
+      const v=parseValor(document.getElementById('mValor').value);
+      if(!nome||isNaN(v)||v<=0) return notif('Dados inválidos!','erro');
+      usuarios[logado].metas.push({nome,valor:v,atual:0,concluida:false});
+      salvar(); fecharModal(); renderAba('metas'); notif('Meta criada!');
     });
 }
 
-function modalAporte(i) {
-  const meta = usuarios[logado].metas[i];
+function modalAporte(i){
+  const meta=usuarios[logado].metas[i];
   modal(`Aportar: ${meta.nome}`,
-    `<label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Valor do aporte (R$)</label>
+    `<label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Valor (R$)</label>
      <input id="mInp" class="inp" type="text" placeholder="0,00" style="margin-bottom:0">`,
-    () => {
-      const v = parseValor(document.getElementById('mInp').value);
-      if (isNaN(v) || v <= 0) return notif('Valor inválido!','erro');
-      if (v > usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
-      usuarios[logado].saldo -= v;
-      usuarios[logado].metas[i].atual += v;
-      if (usuarios[logado].metas[i].atual >= usuarios[logado].metas[i].valor) {
-        usuarios[logado].metas[i].concluida = true;
-        notif('🎉 Meta concluída!');
-      } else { notif(`Aporte de R$ ${fmt(v)} realizado!`); }
-      usuarios[logado].historico.push(`[${hora()}] APORTE META '${meta.nome}': -R$ ${fmt(v)}`);
+    ()=>{
+      const v=parseValor(document.getElementById('mInp').value);
+      if(isNaN(v)||v<=0) return notif('Valor inválido!','erro');
+      if(v>usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
+      usuarios[logado].saldo-=v;
+      usuarios[logado].metas[i].atual+=v;
+      if(usuarios[logado].metas[i].atual>=usuarios[logado].metas[i].valor){usuarios[logado].metas[i].concluida=true;notif('🎉 Meta concluída!');}
+      else notif(`Aporte de R$ ${fmt(v)} realizado!`);
+      const reg=`[${hora()}] APORTE META '${meta.nome}': -R$ ${fmt(v)}`;
+      usuarios[logado].historico.push(reg);
       salvar(); fecharModal(); renderAba('metas');
     });
 }
 
-// ========== BOLSA ==========
-function modalTrade(ticker, acao) {
-  const preco = mercado[ticker].preco;
+// ============ BOLSA ============
+function modalTrade(ticker,acao){
+  const preco=mercado[ticker].preco;
   modal(`${acao==='C'?'Comprar':'Vender'} ${ticker}`,
     `<div style="color:var(--cinza);font-size:.85rem;margin-bottom:14px">Preço atual: <strong style="color:var(--verde)">R$ ${fmt(preco)}</strong></div>
      <label style="font-size:.82rem;color:var(--cinza);display:block;margin-bottom:6px">Quantidade</label>
      <input id="mInp" class="inp" type="number" min="1" placeholder="1" style="margin-bottom:0">`,
-    () => {
-      const qtd = parseInt(document.getElementById('mInp').value);
-      if (!qtd || qtd <= 0) return notif('Quantidade inválida!','erro');
-      const total = preco * qtd;
-      if (acao === 'C') {
-        if (total > usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
-        usuarios[logado].saldo -= total;
-        usuarios[logado].carteira[ticker] = (usuarios[logado].carteira[ticker]||0) + qtd;
-        usuarios[logado].historico.push(`[${hora()}] COMPRA ${ticker}: ${qtd}x = -R$ ${fmt(total)}`);
+    ()=>{
+      const qtd=parseInt(document.getElementById('mInp').value);
+      if(!qtd||qtd<=0) return notif('Quantidade inválida!','erro');
+      const total=preco*qtd;
+      let reg;
+      if(acao==='C'){
+        if(total>usuarios[logado].saldo) return notif('Saldo insuficiente!','erro');
+        usuarios[logado].saldo-=total;
+        usuarios[logado].carteira[ticker]=(usuarios[logado].carteira[ticker]||0)+qtd;
+        reg=`[${hora()}] COMPRA ${ticker}: ${qtd}x = -R$ ${fmt(total)}`;
       } else {
-        if ((usuarios[logado].carteira[ticker]||0) < qtd) return notif('Você não possui essa quantidade!','erro');
-        usuarios[logado].saldo += total;
-        usuarios[logado].carteira[ticker] -= qtd;
-        usuarios[logado].historico.push(`[${hora()}] VENDA ${ticker}: ${qtd}x = +R$ ${fmt(total)}`);
+        if((usuarios[logado].carteira[ticker]||0)<qtd) return notif('Você não possui essa quantidade!','erro');
+        usuarios[logado].saldo+=total;
+        usuarios[logado].carteira[ticker]-=qtd;
+        reg=`[${hora()}] VENDA ${ticker}: ${qtd}x = +R$ ${fmt(total)}`;
       }
+      usuarios[logado].historico.push(reg);
       salvar(); fecharModal(); renderAba('bolsa');
       notif(`${acao==='C'?'Compra':'Venda'} de ${qtd}x ${ticker} realizada!`);
+      setTimeout(()=>verComprovante(encodeURIComponent(reg)),400);
     });
 }
 
-// ========== CRIPTO OMEGA ==========
-function renderCripto() {
-  const el = document.getElementById('mainConteudo');
-  const d  = usuarios[logado];
-  const os = d.omegaSaldo || 0;
-  const vBRL = fmt(os * omegaPreco);
-  const ult  = omegaBlockchain[omegaBlockchain.length-1];
-
-  el.innerHTML = `
+// ============ CRIPTO ============
+function renderCripto(){
+  const el=document.getElementById('mainConteudo');
+  const d=usuarios[logado];
+  const os=d.omegaSaldo||0;
+  const ult=omegaBlockchain[omegaBlockchain.length-1];
+  el.innerHTML=`
     <div class="pg-header"><div><div class="pg-titulo">🔮 Cripto Omega</div><div class="pg-sub">Blockchain com prova de trabalho SHA-256</div></div></div>
     <div class="cripto-header">
       <div style="position:relative;z-index:1">
@@ -892,7 +1050,7 @@ function renderCripto() {
         <div class="cripto-cotacao">
           <div class="dot-mine"></div>
           Cotação ao vivo: <span id="omega-preco-live">$ ${omegaPreco.toFixed(2)}</span>
-          &nbsp;≈&nbsp; <span style="color:#10b981">R$ ${vBRL}</span>
+          &nbsp;≈&nbsp; <span style="color:#10b981">R$ ${fmt(os*omegaPreco)}</span>
         </div>
         <div class="cripto-stats">
           <div class="cripto-stat"><div class="cv">${omegaBlockchain.length}</div><div class="cl">Blocos</div></div>
@@ -902,74 +1060,51 @@ function renderCripto() {
       </div>
     </div>
     <div class="cripto-acoes">
-      <div class="cripto-ac-card">
-        <h4>⬆ Depósito Omega</h4>
-        <input type="number" id="omega-dep" placeholder="Quantia Ω" min="0.01" step="0.01">
-        <button class="btn-dep-omega" id="btn-dep-omega" onclick="omegaOp('DEPÓSITO')">Depositar Ω</button>
-      </div>
-      <div class="cripto-ac-card">
-        <h4>⬇ Saque Omega</h4>
-        <input type="number" id="omega-saq" placeholder="Quantia Ω" min="0.01" step="0.01">
-        <button class="btn-saq-omega" id="btn-saq-omega" onclick="omegaOp('SAQUE')">Sacar Ω</button>
-      </div>
+      <div class="cripto-ac-card"><h4>⬆ Depósito Omega</h4><input type="number" id="omega-dep" placeholder="Quantia Ω" min="0.01" step="0.01"><button class="btn-dep-omega" id="btn-dep-omega" onclick="omegaOp('DEPÓSITO')">Depositar Ω</button></div>
+      <div class="cripto-ac-card"><h4>⬇ Saque Omega</h4><input type="number" id="omega-saq" placeholder="Quantia Ω" min="0.01" step="0.01"><button class="btn-saq-omega" id="btn-saq-omega" onclick="omegaOp('SAQUE')">Sacar Ω</button></div>
     </div>
     <div class="cripto-grid">
-      <div class="ledger">
-        <h4>📜 Ledger Blockchain</h4>
-        <div class="ledger-list" id="ledgerList">${gerarLedger()}</div>
-      </div>
+      <div class="ledger"><h4>📜 Ledger Blockchain</h4><div class="ledger-list" id="ledgerList">${gerarLedger()}</div></div>
       <div>
-        <div class="rede-card">
-          <h4>📊 Atividade da Rede</h4>
-          <div class="chart-bars">${gerarBars()}</div>
-          <div style="font-size:.72rem;color:#4b5563">Crescimento por bloco minerado</div>
-        </div>
-        <div class="rede-card">
-          <h4>🔗 Info da Rede</h4>
-          <p style="font-size:.8rem;color:var(--cinza);margin-bottom:8px">Transações imutáveis com SHA-256 e Prova de Trabalho.</p>
-          <div class="debug-h">Último Hash: ${ult.hash}<br>Blocos: ${omegaBlockchain.length} | Dificuldade: "${OMEGA_DIFIC}"</div>
-        </div>
+        <div class="rede-card"><h4>📊 Atividade da Rede</h4><div class="chart-bars">${gerarBars()}</div><div style="font-size:.72rem;color:#4b5563">Crescimento por bloco minerado</div></div>
+        <div class="rede-card"><h4>🔗 Info da Rede</h4><p style="font-size:.8rem;color:var(--cinza);margin-bottom:8px">Transações imutáveis com SHA-256.</p><div class="debug-h">Último Hash: ${ult.hash}<br>Blocos: ${omegaBlockchain.length} | Dificuldade: "${OMEGA_DIFIC}"</div></div>
       </div>
     </div>`;
 }
 
-function gerarLedger() {
-  if (omegaBlockchain.length <= 1) return '<div style="color:var(--cinza);text-align:center;padding:30px;font-size:.88rem">Nenhuma transação ainda.<br>Faça seu primeiro depósito!</div>';
-  return [...omegaBlockchain].slice(1).reverse().map(b => {
-    const cor = b.tipo==='DEPÓSITO' ? '#10b981' : '#ef4444';
-    const s   = b.tipo==='DEPÓSITO' ? '+' : '-';
+function gerarLedger(){
+  if(omegaBlockchain.length<=1) return '<div style="color:var(--cinza);text-align:center;padding:30px;font-size:.88rem">Nenhuma transação ainda.</div>';
+  return [...omegaBlockchain].slice(1).reverse().map(b=>{
+    const cor=b.tipo==='DEPÓSITO'?'#10b981':'#ef4444';
+    const s=b.tipo==='DEPÓSITO'?'+':'-';
     return `<div class="tx"><div><div class="tt" style="color:${cor}">${b.tipo}</div><div class="th">Hash: ${b.hash.substring(0,20)}...</div></div><div><div class="tv" style="color:${cor}">${s}${Number(b.valor).toFixed(4)} Ω</div><div class="ti">${b.timestamp}</div></div></div>`;
   }).join('');
 }
-function gerarBars() {
-  const q = Math.min(omegaBlockchain.length, 15);
-  return Array.from({length:q},(_,i) => `<div class="chart-bar" style="height:${Math.min(80,((i+1)/q)*80)}px"></div>`).join('');
+function gerarBars(){
+  const q=Math.min(omegaBlockchain.length,15);
+  return Array.from({length:q},(_,i)=>`<div class="chart-bar" style="height:${Math.min(80,((i+1)/q)*80)}px"></div>`).join('');
 }
 
-async function calcHash(txt) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+async function calcHash(txt){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-async function omegaOp(tipo) {
-  const iI = tipo==='DEPÓSITO' ? 'omega-dep' : 'omega-saq';
-  const iB = tipo==='DEPÓSITO' ? 'btn-dep-omega' : 'btn-saq-omega';
-  const inp = document.getElementById(iI);
-  const btn = document.getElementById(iB);
-  if (!inp||!btn) return;
-  const v = parseFloat(inp.value);
-  if (isNaN(v)||v<=0) return notif('Valor inválido!','erro');
-  const sa = usuarios[logado].omegaSaldo||0;
-  if (tipo==='SAQUE'&&v>sa) return notif('Saldo Omega insuficiente!','erro');
-
+async function omegaOp(tipo){
+  const iI=tipo==='DEPÓSITO'?'omega-dep':'omega-saq';
+  const iB=tipo==='DEPÓSITO'?'btn-dep-omega':'btn-saq-omega';
+  const inp=document.getElementById(iI), btn=document.getElementById(iB);
+  if(!inp||!btn) return;
+  const v=parseFloat(inp.value);
+  if(isNaN(v)||v<=0) return notif('Valor inválido!','erro');
+  const sa=usuarios[logado].omegaSaldo||0;
+  if(tipo==='SAQUE'&&v>sa) return notif('Saldo Omega insuficiente!','erro');
   btn.disabled=true; btn.innerHTML='<span class="dot-mine" style="display:inline-block"></span> Minerando...';
-
-  const hAnt = omegaBlockchain[omegaBlockchain.length-1].hash;
-  const ts   = hora();
-  const db   = {tipo,valor:v,timestamp:ts};
+  const hAnt=omegaBlockchain[omegaBlockchain.length-1].hash;
+  const ts=hora();
+  const db={tipo,valor:v,timestamp:ts};
   let nonce=0,hash='';
-  while(true){ hash=await calcHash(omegaBlockchain.length+JSON.stringify(db)+hAnt+nonce); if(hash.startsWith(OMEGA_DIFIC)) break; nonce++; }
-
+  while(true){hash=await calcHash(omegaBlockchain.length+JSON.stringify(db)+hAnt+nonce);if(hash.startsWith(OMEGA_DIFIC))break;nonce++;}
   if(tipo==='DEPÓSITO') usuarios[logado].omegaSaldo=(sa+v);
   else usuarios[logado].omegaSaldo=(sa-v);
   if(!usuarios[logado].omegaHistorico) usuarios[logado].omegaHistorico=[];
@@ -982,12 +1117,12 @@ async function omegaOp(tipo) {
   renderCripto();
 }
 
-// ========== ENTER ==========
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  if (!document.getElementById('telaLogin').classList.contains('hidden'))    login();
-  if (!document.getElementById('telaCadastro').classList.contains('hidden')) cadastrar();
-  if (!document.getElementById('modalBg').classList.contains('hidden') && _modalCb) _modalCb();
+// ============ ENTER ============
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  if(!document.getElementById('telaLogin').classList.contains('hidden')) login();
+  if(!document.getElementById('telaCadastro').classList.contains('hidden')) cadastrar();
+  if(!document.getElementById('modalBg').classList.contains('hidden')&&_modalCb) _modalCb();
 });
 </script>
 </body>
